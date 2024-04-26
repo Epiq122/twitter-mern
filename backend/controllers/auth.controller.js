@@ -58,9 +58,35 @@ export const signUp = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  res.json({ message: 'logout route' });
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    const validPassword = await bcrypt.compare(password, user?.password || '');
+
+    if (!user || !validPassword) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    generateTokenAndSetCookie(user._id, res);
+    return res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      followers: user.followers,
+      following: user.following,
+      profilePicture: user.profilePicture,
+      coverPicture: user.coverPicture,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 export const logout = async (req, res) => {
-  res.json({ message: 'logout route' });
+  try {
+    res.cookie('jwt', '', { maxAge: 0 });
+    return res.status(200).json({ message: 'Logged out' });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
