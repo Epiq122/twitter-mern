@@ -9,6 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json()); // middleware to parse JSON data
+app.use(express.urlencoded({ extended: true })); // middleware to parse form data
 
 app.use('/api/auth', authRoutes);
 
